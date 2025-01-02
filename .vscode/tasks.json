@@ -2,14 +2,14 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Compile Kotlin Files",
+            "label": "Compile and Execute",
             "type": "shell",
-            "command": "kotlinc src/Authentication.kt src/auth/Message.kt src/auth/Channel.kt src/auth/Device.kt src/auth/Server.kt -include-runtime -d output.jar && java -jar output.jar",
+            "command": "kotlinc src/Authentication.kt src/auth/Message.kt src/auth/Channel.kt src/auth/Device.kt src/auth/IoTDevice.kt src/auth/Server.kt -include-runtime -d output.jar && java -jar output.jar",
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "Compiles the Kotlin source files"
+            "detail": "Compiles and executes the Kotlin source files"
         }
     ]
 }
