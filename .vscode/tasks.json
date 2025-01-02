@@ -4,7 +4,7 @@
         {
             "label": "Compile and Execute",
             "type": "shell",
-            "command": "kotlinc src/Authentication.kt src/auth/Message.kt src/auth/Channel.kt src/auth/Device.kt src/auth/IoTDevice.kt src/auth/Server.kt -include-runtime -d output.jar && java -jar output.jar",
+            "command": "kotlinc src/kotlin/Authentication.kt src/kotlin/auth/Message.kt src/kotlin/auth/Channel.kt src/kotlin/auth/Device.kt src/kotlin/auth/IoTDevice.kt src/kotlin/auth/Server.kt -include-runtime -d authentication.jar && java -jar authentication.jar",
             "group": {
                 "kind": "build",
                 "isDefault": true
