@@ -24,8 +24,6 @@ class Server(override val ID: UByteArray, override val vault: MutableList<UByteA
                     C1[index++] = element.toUByte()
                 
                 
-                
-                
                 r1 = generateUByteArray(m)
                 val M2 = Message(ID, received.source, mutableListOf(C1, r1))
                 sendMessage(M2)
@@ -88,13 +86,8 @@ class Server(override val ID: UByteArray, override val vault: MutableList<UByteA
         removeInbound()
     }
 
-
-
     override fun toString(): String{
         return super.toString()
     }
 
-
-
-    
 }

@@ -12,7 +12,6 @@ open class Device(open val ID: UByteArray, open val vault: MutableList<UByteArra
 
     fun sendMessage(message: Message) {
         outboundMessages.add(message)
-
         println("Message sent. Description:\n${message}")
     }
 
@@ -36,12 +35,14 @@ open class Device(open val ID: UByteArray, open val vault: MutableList<UByteArra
         return outboundMessages;
     }
 
+
+
+
     open fun initiateAuthentication() {}
 
     open fun operate() {}
     
     open fun deauthenticate() {}
-
 
     protected fun encrypt(message: UByteArray, key: UByteArray): UByteArray {
         val secretKey = SecretKeySpec(key.toByteArray(), "AES")
@@ -51,7 +52,6 @@ open class Device(open val ID: UByteArray, open val vault: MutableList<UByteArra
         return encryptedBytes.toUByteArray()
     }
 
-    // Decrypt a UByteArray message using a UByteArray key
     protected fun decrypt(encryptedMessage: UByteArray, key: UByteArray): UByteArray {
         val secretKey = SecretKeySpec(key.toByteArray(), "AES")
         val cipher = Cipher.getInstance("AES")

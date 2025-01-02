@@ -12,15 +12,19 @@ class IoTDevice(override val ID: UByteArray, override val vault: MutableList<UBy
     private var autht = UByteArray(m)
     private var authServer: UByteArray? = null
 
-
-
-    
     override fun initiateAuthentication() {
         val sessionID = generateUByteArray(m)
         val M1 = Message(ID, ubyteArrayOf(255u), mutableListOf(ID, sessionID))
         sendMessage(M1)
 
         step = 1;
+    }
+
+    override fun deauthenticate() {
+        step = 0
+    
+        autht = UByteArray(m)
+        authServer = null
     }
 
     override fun operate() {
@@ -105,16 +109,4 @@ class IoTDevice(override val ID: UByteArray, override val vault: MutableList<UBy
         return "${device}\t\tAuth: ${auth}\tKey: ${autht.joinToString()}"
     }
 
-    override fun deauthenticate() {
-        step = 0
-        t1 = UByteArray(m)
-        t2 = UByteArray(m)
-        k2 = UByteArray(m)
-        r2 = UByteArray(m)
-    
-        autht = UByteArray(m)
-        authServer = null
-    }
-
-    
 }

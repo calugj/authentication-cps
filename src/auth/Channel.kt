@@ -9,7 +9,6 @@ class Channel(val number: Int) {
     private var devices: MutableList<Device> = mutableListOf()
     private var messages: MutableList<Message> = mutableListOf()
     
-    
     init {
         var vault: MutableList<UByteArray> = mutableListOf()
         for(i in 0..n-1)
@@ -27,14 +26,12 @@ class Channel(val number: Int) {
         // Sender -> Message ------------------------> Destination
         operateOnDevices()
 
-
         // deliver messages from devices to the channel
         // Sender ------------> Message ------------ -> Destination
         for(device in devices) 
             for(message in device.getOutbound())
                 messages.add(message)
         removeOutbound()
-
 
         // deliver messages from the channel to the destination
         // Sender -------------------------> Message -> Destination
@@ -46,9 +43,7 @@ class Channel(val number: Int) {
                     device.receiveMessage(message)
         }
         removeMessages()
-
         println("\n##########################################################\n")
-
     }
 
     fun addMessage(message: Message) {
@@ -66,6 +61,13 @@ class Channel(val number: Int) {
         for(device in devices)
             if(device.ID.contentEquals(ubyteArrayOf(deviceID.toUByte())))
                 device.initiateAuthentication()
+    }
+
+    fun deauthenticate(deviceID: Int) {
+        for(device in devices)
+            if(device.ID.contentEquals(ubyteArrayOf(deviceID.toUByte())))
+                device.deauthenticate()
+        println("Device ${deviceID} successfully deauthenticated.")
     }
 
     fun operateOnDevices() {
@@ -88,13 +90,5 @@ class Channel(val number: Int) {
         }
         return "Channel info:\n------------------------------\n${devicez}------------------------------"
     }
-
-    fun deauthenticate(deviceID: Int) {
-        for(device in devices)
-            if(device.ID.contentEquals(ubyteArrayOf(deviceID.toUByte())))
-                device.deauthenticate()
-        println("Device ${deviceID} successfully deauthenticated.")
-    }
-
 
 }
