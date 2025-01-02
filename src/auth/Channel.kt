@@ -1,7 +1,7 @@
 package auth
 import kotlin.random.Random
 
-public val n = 50
+public val n = 25
 public val m = 32
 
 @kotlin.ExperimentalUnsignedTypes

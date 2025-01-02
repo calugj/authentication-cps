@@ -68,7 +68,7 @@ open class Device(open val ID: UByteArray, open val vault: MutableList<UByteArra
         var device = ""
         if(ID.contentEquals(ubyteArrayOf(255.toUByte()))) device += "[SERVER]"
         else device += "[IoT]"
-        device += " ID: ${ID.joinToString()}"
+        device += "\tID: ${ID.joinToString()}"
         return device
     }
 }

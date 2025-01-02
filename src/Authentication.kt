@@ -37,11 +37,10 @@ fun main() {
             print("\u001b[H\u001b[2J")
             System.out.flush()
             channel.startDemo(device)
-            channel.operate()
-            channel.operate()
-            channel.operate()
-            channel.operate()
-            channel.operate()
+            for(i in 0..4) {
+                channel.operate()
+                Thread.sleep(500)
+            }
         } else if(choice == 3) {
             var device = -1
             do {
