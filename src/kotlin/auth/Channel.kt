@@ -10,6 +10,7 @@ class Channel(val number: Int) {
     private var messages: MutableList<Message> = mutableListOf()
     
     init {
+        /*
         var vault: MutableList<UByteArray> = mutableListOf()
         for(i in 0..n-1)
             vault.add(UByteArray(m) { Random.nextInt(0, 256).toUByte() })
@@ -18,6 +19,24 @@ class Channel(val number: Int) {
             devices.add(IoTDevice(ubyteArrayOf(i.toUByte()), vault))
 
         devices.add(Server(ubyteArrayOf(255u), vault))
+        */
+
+        var vaultArray: MutableList<MutableList<UByteArray>> = mutableListOf()
+        var vault: MutableList<UByteArray> = mutableListOf()
+        for(i in 0..number - 1) {
+            for(j in 0..n-1)
+                vault.add(UByteArray(m) { Random.nextInt(0, 256).toUByte() })
+            vaultArray.add(vault)
+            devices.add(IoTDevice(ubyteArrayOf(i.toUByte()), mutableListOf(vault)))
+            vault = mutableListOf()
+        }
+            
+        devices.add(Server(ubyteArrayOf(255u), vaultArray))
+
+
+
+
+
     }
 
 
@@ -63,11 +82,26 @@ class Channel(val number: Int) {
                 device.initiateAuthentication()
     }
 
+    fun startCommunication(deviceID: Int, message: String) {
+        for(device in devices)
+            if(device.ID.contentEquals(ubyteArrayOf(deviceID.toUByte())) && device is IoTDevice)
+                device.startCommunication(deviceID, message)
+    }
+
     fun deauthenticate(deviceID: Int) {
         for(device in devices)
             if(device.ID.contentEquals(ubyteArrayOf(deviceID.toUByte())))
                 device.deauthenticate()
+            else if(device.ID.contentEquals(ubyteArrayOf(255.toUByte())) && device is Server)
+                device.deauthenticate(deviceID)
         println("Device ${deviceID} successfully deauthenticated.")
+    }
+
+    fun isAuthenticated(deviceID: Int): Boolean {
+        for(device in devices)
+            if(device.ID.contentEquals(ubyteArrayOf(255.toUByte())) && device is Server)
+                return device.isAuthenticated(deviceID)
+        return false
     }
 
     fun operateOnDevices() {

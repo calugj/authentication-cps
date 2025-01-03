@@ -5,7 +5,7 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
 
 @kotlin.ExperimentalUnsignedTypes
-open class Device(open val ID: UByteArray, open val vault: MutableList<UByteArray>) {
+open class Device(open val ID: UByteArray, open val vault: MutableList<MutableList<UByteArray>>) {
     protected var inboundMessages: MutableList<Message> = mutableListOf()
     protected var outboundMessages: MutableList<Message> = mutableListOf()
     protected var step = 0

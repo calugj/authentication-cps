@@ -2,13 +2,13 @@ package auth
 import kotlin.random.Random
 
 @kotlin.ExperimentalUnsignedTypes
-class Server(override val ID: UByteArray, override val vault: MutableList<UByteArray>): Device(ID, vault) {
+class Server(override val ID: UByteArray, override val vault: MutableList<MutableList<UByteArray>>): Device(ID, vault) {
 
     private var r1 = UByteArray(m)
     private var k1 = UByteArray(m)
     private var t1 = UByteArray(m)
     private var t2 = UByteArray(m)
-    private val table: MutableList<UByteArray> = mutableListOf()
+    private val table: MutableList<MutableList<UByteArray>> = mutableListOf()
 
     override fun operate() {
         if(step == 0 && getInbound().size >= 1) {
@@ -34,10 +34,18 @@ class Server(override val ID: UByteArray, override val vault: MutableList<UByteA
                 var flag = false
                 for(i in C1) {
                     if(!flag) {
-                        k1 = vault[i.toInt()]
+                        k1 = vault[received.source[0].toInt()][i.toInt()]
                         flag = true
-                    } else k1 = UByteArray(k1.size) { index -> (k1[index].toInt() xor vault[i.toInt()][index].toInt()).toUByte() }
+                    } else k1 = UByteArray(k1.size) { index -> (k1[index].toInt() xor vault[received.source[0].toInt()][i.toInt()][index].toInt()).toUByte() }
                 } 
+            }
+            else{
+                var encrypted = received.payload[0]
+                val decrypted = decrypt(encrypted, getKey(received.source))
+                val string = decrypted.toByteArray().toString(Charsets.UTF_8) + "| this part was added by SERVER: Return back to sender"
+                encrypted = encrypt(string.toByteArray().toUByteArray(), getKey(received.source))
+                val MESSAGE = Message(ID, received.source, mutableListOf(encrypted))
+                sendMessage(MESSAGE)
             }
         }
         else if(step == 2 && getInbound().size >= 1) {
@@ -56,9 +64,9 @@ class Server(override val ID: UByteArray, override val vault: MutableList<UByteA
                 var flag = false
                 for(i in C2) {
                     if(!flag) {
-                        k2 = vault[i.toInt()]
+                        k2 = vault[received.source[0].toInt()][i.toInt()]
                         flag = true
-                    } else k2 = UByteArray(k2.size) { index -> (k2[index].toInt() xor vault[i.toInt()][index].toInt()).toUByte() }
+                    } else k2 = UByteArray(k2.size) { index -> (k2[index].toInt() xor vault[received.source[0].toInt()][i.toInt()][index].toInt()).toUByte() }
                 }
                 
                 val k2xort1 = UByteArray(k2.size) { index -> (k2[index].toInt() xor t1[index].toInt()).toUByte() }
@@ -81,13 +89,44 @@ class Server(override val ID: UByteArray, override val vault: MutableList<UByteA
 
 
                 val t = UByteArray(t1.size) { index -> (t1[index].toInt() xor t2[index].toInt()).toUByte() }
+                val id = received.source
+
+                deauthenticate(id[0].toInt())
+
+                table.add(mutableListOf(id, t))
             }
         }
         removeInbound()
     }
 
+    fun getKey(deviceID: UByteArray): UByteArray {
+        for(element in table)
+            if(element[0].contentEquals(deviceID))
+                return element[1]
+        return UByteArray(m)
+    }
+
+    fun deauthenticate(deviceID: Int) {
+        for(element in table)
+            if(element[0].contentEquals(ubyteArrayOf(deviceID.toUByte()))) {
+                table.remove(element)
+                break
+            }
+    }
+
+    fun isAuthenticated(deviceID: Int): Boolean {
+        for(element in table)
+            if(element[0].contentEquals(ubyteArrayOf(deviceID.toUByte())))
+                return true
+        return false
+    }
+
     override fun toString(): String{
-        return super.toString()
+        var device = super.toString()
+        device += "\t\tAuthenticated IoT device(s):\n"
+        for(element in table)
+            device += "\t\t\t\tIoT ID: ${element[0].joinToString()}\tKey: ${element[1].joinToString()}\n"
+        return device
     }
 
 }

@@ -2,7 +2,7 @@ package auth
 import kotlin.random.Random
 
 @kotlin.ExperimentalUnsignedTypes
-class IoTDevice(override val ID: UByteArray, override val vault: MutableList<UByteArray>): Device(ID, vault) {
+class IoTDevice(override val ID: UByteArray, override val vault: MutableList<MutableList<UByteArray>>): Device(ID, vault) {
     
     private var t1 = UByteArray(m)
     private var t2 = UByteArray(m)
@@ -27,19 +27,19 @@ class IoTDevice(override val ID: UByteArray, override val vault: MutableList<UBy
         authServer = null
     }
 
+
     override fun operate() {
         if(step == 1 && getInbound().size >= 1) {
             val received = getInbound()[0]
-
             // Compute key k1
             var k1 = UByteArray(m)
             var flag = false
             for(i in received.payload[0]) {
                 if(!flag) {
-                    k1 = vault[i.toInt()]
+                    k1 = vault[0][i.toInt()]
                     flag = true
                 }
-                else k1 = UByteArray(k1.size) { index -> (k1[index].toInt() xor vault[i.toInt()][index].toInt()).toUByte() }
+                else k1 = UByteArray(k1.size) { index -> (k1[index].toInt() xor vault[0][i.toInt()][index].toInt()).toUByte() }
             }
 
             val r1 = received.payload[1]
@@ -67,15 +67,14 @@ class IoTDevice(override val ID: UByteArray, override val vault: MutableList<UBy
 
             step = 3
 
-
             // Compute key k2, for future use
             flag = false
             for(i in C2) {
                 if(!flag) {
-                    k2 = vault[i.toInt()]
+                    k2 = vault[0][i.toInt()]
                     flag = true
-                } else k2 = UByteArray(k2.size) { index -> (k2[index].toInt() xor vault[i.toInt()][index].toInt()).toUByte() }
-            }
+                } else k2 = UByteArray(k2.size) { index -> (k2[index].toInt() xor vault[0][i.toInt()][index].toInt()).toUByte() }
+            } 
         }
         else if(step == 3 && getInbound().size >= 1) {
             val received = getInbound()[0].payload[0]
@@ -93,6 +92,11 @@ class IoTDevice(override val ID: UByteArray, override val vault: MutableList<UBy
                 authServer = getInbound()[0].source
                 println("Authentication complete!")
             }
+        } else if(step == 4 && getInbound().size >= 1) { 
+            val received = getInbound()[0]
+            val decrypted = decrypt(received.payload[0], autht).toByteArray().toString(Charsets.UTF_8)
+        
+            println("Relay message:\n${decrypted}")
         }
 
 
@@ -104,9 +108,17 @@ class IoTDevice(override val ID: UByteArray, override val vault: MutableList<UBy
         var auth = true
         if(authServer == null) {
             auth = false
+            return "${device}\t\tAuth: ${auth}"
         }
 
         return "${device}\t\tAuth: ${auth}\tKey: ${autht.joinToString()}"
+    }
+
+    fun startCommunication(deviceID: Int, message: String) {
+        val string = "This part was sent by IoT: ${message} "
+        val encrypted = encrypt(string.toByteArray().toUByteArray(), autht)
+        val MESSAGE = Message(ID, ubyteArrayOf(255.toUByte()), mutableListOf(encrypted))
+        sendMessage(MESSAGE)
     }
 
 }
