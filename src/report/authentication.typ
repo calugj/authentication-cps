@@ -1,3 +1,5 @@
+#import "@preview/chronos:0.2.0"
+
 #set par(justify: true)
 #set heading(numbering: "1.")
 #set math.vec(delim: "[")
@@ -50,6 +52,18 @@
 
 
 = Conclusions
+
+#text()[ciao]
+
+
+#chronos.diagram({
+  import chronos: *
+  _par("IoT")
+  _par("Server")
+
+  _seq("IoT", "Server", comment: "ajeje")
+})
+
 
 
 
