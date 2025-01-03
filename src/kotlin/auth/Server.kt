@@ -76,23 +76,15 @@ class Server(override val ID: UByteArray, override val vault: MutableList<Mutabl
                 r2.copyInto(payload, 0)
                 t2.copyInto(payload, r2.size)
 
-
                 val encryption = encrypt(payload, k2xort1)
                 val M4 = Message(ID, received.source, mutableListOf(encryption))
                 sendMessage(M4)
 
                 step = 0
 
-
-
-
-
-
                 val t = UByteArray(t1.size) { index -> (t1[index].toInt() xor t2[index].toInt()).toUByte() }
                 val id = received.source
-
                 deauthenticate(id[0].toInt())
-
                 table.add(mutableListOf(id, t))
             }
         }

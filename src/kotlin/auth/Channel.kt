@@ -10,17 +10,6 @@ class Channel(val number: Int) {
     private var messages: MutableList<Message> = mutableListOf()
     
     init {
-        /*
-        var vault: MutableList<UByteArray> = mutableListOf()
-        for(i in 0..n-1)
-            vault.add(UByteArray(m) { Random.nextInt(0, 256).toUByte() })
-
-        for(i in 0..number-1)
-            devices.add(IoTDevice(ubyteArrayOf(i.toUByte()), vault))
-
-        devices.add(Server(ubyteArrayOf(255u), vault))
-        */
-
         var vaultArray: MutableList<MutableList<UByteArray>> = mutableListOf()
         var vault: MutableList<UByteArray> = mutableListOf()
         for(i in 0..number - 1) {
@@ -32,11 +21,6 @@ class Channel(val number: Int) {
         }
             
         devices.add(Server(ubyteArrayOf(255u), vaultArray))
-
-
-
-
-
     }
 
 

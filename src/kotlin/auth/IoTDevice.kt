@@ -99,19 +99,14 @@ class IoTDevice(override val ID: UByteArray, override val vault: MutableList<Mut
             println("Relay message:\n${decrypted}")
         }
 
-
         removeInbound()
     }
 
     override fun toString(): String {
         var device = super.toString()
-        var auth = true
-        if(authServer == null) {
-            auth = false
-            return "${device}\t\tAuth: ${auth}"
-        }
-
-        return "${device}\t\tAuth: ${auth}\tKey: ${autht.joinToString()}"
+        if(authServer == null)
+            return "${device}\t\tAuth: false"
+        return "${device}\t\tAuth: true\tKey: ${autht.joinToString()}"
     }
 
     fun startCommunication(deviceID: Int, message: String) {
