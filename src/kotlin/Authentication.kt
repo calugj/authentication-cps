@@ -7,78 +7,85 @@ fun main() {
     println("IoT devices authentication simulator.")
     var number = 0
     do {
-        print("Enter the number of IoT devices [1-255]: ")
+        print("Enter the number of IoT devices [1-255], suggested is 5.\nNumber: ")
         number = readLine()?.toIntOrNull() ?: 0 
         print("\u001b[H\u001b[2J")
     } while(number <= 0 || number > 255)
     val channel = Channel(number)
 
-    var choice = 0
-    while(choice != 5) {
-        do {
-            print("Main Menu\n1) Show info\n2) Start authentication process\n3) Deauthenticate a device\n4) Test communication\n5) Quit\nChoice: ")
-            choice = readLine()?.toIntOrNull() ?: 0 
-        } while(choice <= 0 || choice > 5)
-        print("\u001b[H\u001b[2J")
-        System.out.flush()
 
-        if(choice == 1) {
-            print("\u001b[H\u001b[2J")
-            System.out.flush()
-            println(channel)
-        } else if(choice == 2) {
-            var device = -1
-            do {
-                print("Select device [0-${number-1}]: ")
-                device = readLine()?.toIntOrNull() ?: 0
-                print("\u001b[H\u001b[2J")
-                System.out.flush()
-            } while(device < 0 || device >= number)
-            print("\u001b[H\u001b[2J")
-            System.out.flush()
-            channel.startDemo(device)
-            for(i in 0..4) {
+    val thread = Thread {
+        try {
+            while (!Thread.currentThread().isInterrupted) {
                 channel.operate()
-                Thread.sleep(500)
+                Thread.sleep(100)
             }
-        } else if(choice == 3) {
+        } catch (e: InterruptedException) {}
+    }
+    thread.start()
+
+    var choice = '0'
+    do {
+        do {
+            print("1) Print channel info\n2) Start authentication process\n3) Deauthenticate a device\n4) Test communication\n5) Quit\nChoice: ")
+            java.lang.Runtime.getRuntime().exec(arrayOf("/bin/sh", "-c", "stty raw </dev/tty")).waitFor()
+            choice = System.`in`.read().toChar()
+            java.lang.Runtime.getRuntime().exec(arrayOf("/bin/sh", "-c", "stty cooked </dev/tty")).waitFor()
+            print("\u001b[H\u001b[2J")
+        } while(choice != '1' && choice != '2' && choice != '3' && choice != '4' && choice != '5')
+        
+
+        if(choice == '1') {
+            println(channel)
+        }
+        else if(choice == '2') {
             var device = -1
             do {
                 print("Select device [0-${number-1}]: ")
                 device = readLine()?.toIntOrNull() ?: 0
                 print("\u001b[H\u001b[2J")
-                System.out.flush()
             } while(device < 0 || device >= number)
-            channel.deauthenticate(device)
-        } else if(choice == 4) {
+            if(channel.isAuthenticated(device))
+                    println("Device ${device} is already authenticated.\n")
+            else {
+                channel.authenticate(device)
+                while(!channel.isAuthenticated(device)) Thread.sleep(100)
+            }
+        }
+        else if(choice == '3') {
+            var device = -1
+            do {
+                print("Select device [0-${number-1}]: ")
+                device = readLine()?.toIntOrNull() ?: 0
+                print("\u001b[H\u001b[2J")
+            } while(device < 0 || device >= number)
+            if(channel.isAuthenticated(device)) {
+                channel.deauthenticate(device)
+                while(channel.isAuthenticated(device)) Thread.sleep(100)
+            }
+            else println("Device ${device} is not authenticated yet.\n")
+        }
+        else if(choice == '4') {
             var device = -1
             do {
                 print("Test communication [0-${number-1}]: ")
                 device = readLine()?.toIntOrNull() ?: 0
                 print("\u001b[H\u001b[2J")
-                System.out.flush()
-                if(channel.isAuthenticated(device)) {
-                    var message: String
-                    do {
-                        print("\u001b[H\u001b[2J")
-                        System.out.flush()
-                        print("Enter a non-empty string: ")
-                        message = readLine().orEmpty()
-                    } while (message.isEmpty())
-                    print("\u001b[H\u001b[2J")
-                    System.out.flush()
-                    channel.startCommunication(device, message)
-                    for(i in 0..2) {
-                        channel.operate()
-                        Thread.sleep(500)
-                    }
-
-                } else println("Device ID: ${device} is not authenticated.")
             } while(device < 0 || device >= number)
-            
+            if(channel.isAuthenticated(device)) {
+                var message: String
+                do {
+                    print("Enter a message: ")
+                    message = readLine().orEmpty()
+                    print("\u001b[H\u001b[2J")
+                } while (message.isEmpty())
+                
+                channel.startCommunication(device, message)
+                while(!channel.isCommunicationCompleted(device)) Thread.sleep(100)
+            }
+            else println("Device ID: ${device} is not authenticated yet.\n")
         }
+    } while (choice != '5')
 
-        println("\n")
-    }
-
+    thread.interrupt()
 }

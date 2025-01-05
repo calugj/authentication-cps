@@ -1,4 +1,5 @@
 package auth
+
 import kotlin.random.Random
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
@@ -36,9 +37,6 @@ open class Device(open val ID: UByteArray, open val vault: MutableList<MutableLi
     }
 
 
-
-
-    open fun initiateAuthentication() {}
 
     open fun operate() {}
     

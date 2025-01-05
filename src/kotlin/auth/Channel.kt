@@ -3,6 +3,9 @@ import kotlin.random.Random
 
 public val n = 25
 public val m = 32
+public val AUTH = ubyteArrayOf(0u)
+public val DEAUTH = ubyteArrayOf(1u)
+public val MESG = ubyteArrayOf(2u)
 
 @kotlin.ExperimentalUnsignedTypes
 class Channel(val number: Int) {
@@ -46,7 +49,6 @@ class Channel(val number: Int) {
                     device.receiveMessage(message)
         }
         removeMessages()
-        println("\n##########################################################\n")
     }
 
     fun addMessage(message: Message) {
@@ -57,35 +59,51 @@ class Channel(val number: Int) {
         messages = mutableListOf()
     }
 
-    fun startDemo(deviceID: Int) {
-        println("\n##########################################################\n")
-        println("Authentication process started for device ID: ${deviceID}.")
-        println("\n##########################################################\n")
+    fun getMessages(): MutableList<Message> {
+        return messages
+    }
+
+    fun authenticate(deviceID: Int) {
         for(device in devices)
-            if(device.ID.contentEquals(ubyteArrayOf(deviceID.toUByte())))
-                device.initiateAuthentication()
+            if(device.ID.contentEquals(ubyteArrayOf(deviceID.toUByte())) && device is IoTDevice)
+                device.authenticate()
     }
 
     fun startCommunication(deviceID: Int, message: String) {
         for(device in devices)
-            if(device.ID.contentEquals(ubyteArrayOf(deviceID.toUByte())) && device is IoTDevice)
+            if(device.ID.contentEquals(ubyteArrayOf(deviceID.toUByte())) && device is IoTDevice) {
+                println("\n##########################################################\n")
+                println("Communication initiated!")
+                println("\n##########################################################\n")
                 device.startCommunication(deviceID, message)
+            }
+                
+    }
+
+    fun isCommunicationCompleted(deviceID: Int): Boolean {
+        for(device in devices)
+            if(device.ID.contentEquals(ubyteArrayOf(deviceID.toUByte())) && device is IoTDevice)
+                return device.completed
+        return true
     }
 
     fun deauthenticate(deviceID: Int) {
         for(device in devices)
             if(device.ID.contentEquals(ubyteArrayOf(deviceID.toUByte())))
                 device.deauthenticate()
-            else if(device.ID.contentEquals(ubyteArrayOf(255.toUByte())) && device is Server)
-                device.deauthenticate(deviceID)
-        println("Device ${deviceID} successfully deauthenticated.")
     }
 
     fun isAuthenticated(deviceID: Int): Boolean {
-        for(device in devices)
+        var IoT = false
+        var server = false
+        for(device in devices) {
+            if(device.ID.contentEquals(ubyteArrayOf(deviceID.toUByte())) && device is IoTDevice)
+                IoT = device.isAuthenticated()
             if(device.ID.contentEquals(ubyteArrayOf(255.toUByte())) && device is Server)
-                return device.isAuthenticated(deviceID)
-        return false
+                server = device.isAuthenticated(deviceID)
+        }
+            
+        return IoT && server
     }
 
     fun operateOnDevices() {
