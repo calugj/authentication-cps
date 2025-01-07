@@ -11,8 +11,9 @@ class Server(override val ID: UByteArray, override val vault: MutableList<Mutabl
     private val table: MutableList<MutableList<UByteArray>> = mutableListOf()
 
     override fun operate() {
+        super.operate()
         if(getInbound().size == 0) return
-
+        
         val received = getInbound()[0]
         if(received.payload[0].contentEquals(AUTH)) {
             if(step == 0 && getInbound().size >= 1) {

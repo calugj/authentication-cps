@@ -38,7 +38,14 @@ open class Device(open val ID: UByteArray, open val vault: MutableList<MutableLi
 
 
 
-    open fun operate() {}
+    open fun operate() {
+        if(getInbound().size == 0) return
+        
+        val message = getInbound()[0]
+        val messageType = message.payload[0]
+        if(!messageType.contentEquals(AUTH) && !messageType.contentEquals(DEAUTH) && !messageType.contentEquals(MESG)) removeInbound()
+        
+    }
     
     open fun deauthenticate() {}
 

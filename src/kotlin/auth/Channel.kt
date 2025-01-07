@@ -1,18 +1,21 @@
 package auth
 import kotlin.random.Random
 
-public val n = 25
-public val m = 32
+public var n = 25
+public var m = 32
 public val AUTH = ubyteArrayOf(0u)
 public val DEAUTH = ubyteArrayOf(1u)
 public val MESG = ubyteArrayOf(2u)
 
 @kotlin.ExperimentalUnsignedTypes
-class Channel(val number: Int) {
+class Channel(val number: Int, val _n: Int, val _m: Int) {
     private var devices: MutableList<Device> = mutableListOf()
     private var messages: MutableList<Message> = mutableListOf()
     
     init {
+        n = _n
+        m = _m
+
         var vaultArray: MutableList<MutableList<UByteArray>> = mutableListOf()
         var vault: MutableList<UByteArray> = mutableListOf()
         for(i in 0..number - 1) {

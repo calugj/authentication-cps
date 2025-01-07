@@ -4,14 +4,29 @@ import auth.Channel
 @kotlin.ExperimentalUnsignedTypes
 fun main() {
     print("\u001b[H\u001b[2J")
-    println("IoT devices authentication simulator.")
+    println("IoT devices authentication simulator.\n")
     var number = 0
+    var _n = 0
+    var _m = 0
     do {
-        print("Enter the number of IoT devices [1-255], suggested is 5.\nNumber: ")
+        print("Enter the number of IoT devices [1-255]: ")
         number = readLine()?.toIntOrNull() ?: 0 
         print("\u001b[H\u001b[2J")
     } while(number <= 0 || number > 255)
-    val channel = Channel(number)
+
+    do {
+        print("Enter the number of keys in a vault [2-100]: ")
+        _n = readLine()?.toIntOrNull() ?: 0 
+        print("\u001b[H\u001b[2J")
+    } while(_n < 2 || _n > 100)
+
+    do {
+        print("Enter the number of bytes for the keys [16]-[24]-[32]: ")
+        _m = readLine()?.toIntOrNull() ?: 0 
+        print("\u001b[H\u001b[2J")
+    } while(_m != 16 && _m != 24 && _m != 32)
+
+    val channel = Channel(number, _n, _m)
 
 
     val thread = Thread {

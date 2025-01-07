@@ -31,7 +31,7 @@ class IoTDevice(override val ID: UByteArray, override val vault: MutableList<Mut
         println("\n##########################################################\n")
         step = 0
     
-        val M1 = Message(ID, ubyteArrayOf(255u), mutableListOf(DEAUTH))
+        val M1 = Message(ID, ubyteArrayOf(255u), mutableListOf(DEAUTH, ID))
         sendMessage(M1)
         autht = UByteArray(m)
         authServer = null
@@ -44,7 +44,9 @@ class IoTDevice(override val ID: UByteArray, override val vault: MutableList<Mut
 
 
     override fun operate() {
+        super.operate()
         if(getInbound().size == 0) return
+        
         val received = getInbound()[0]
         if(received.payload[0].contentEquals(AUTH)) {
             if(step == 1 && getInbound().size >= 1) {
