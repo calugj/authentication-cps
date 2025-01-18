@@ -156,7 +156,7 @@ In fact the communication can be eavesdropped, but the authentication algorithm 
   $M_3 = E_(k_1) ( r_1 || t_1 || C_2 || r_2 )$
 
   where $k_1 = K[c_(11)] xor K[c_(12)] xor ... xor K[c_(1p)]$, and $t_1$ is a randomly generated number.
-  Challenge $C_2$ is a set of $q$ randomly picked distinct indices, and $"r_2"$ is a randomly generated number.
+  Challenge $C_2$ is a set of $q$ randomly picked distinct indices, and $r_2$ is a randomly generated number.
   Note that $C_1 != C_2$.
   $E_(k_1)$ refers to a symmetric encryption algorithm, using key $k_1$.
   ]
@@ -203,10 +203,10 @@ In fact the communication can be eavesdropped, but the authentication algorithm 
 #linebreak()
 *Vault update*
 
-When the session in terminated, the vault must be updated to both the Server and IoT Device.
+When the session is terminated, the vault must be updated to both the Server and IoT Device.
 After every session, the value of secure vault is changed based on the data exchanged between the server and the IoT device.
 
-$h = H_(k_h) (K)$
+Given $h = H_(k_h) (K)$,
 
 where $H$ is a HMAC function, $K$ is the current vault, $k_h$ is the key for HMAC, obtained from the exchanged messages.
 
@@ -292,6 +292,12 @@ In every channel we have one and only one ```kt Server```, with special $"ID" = 
 = Results and Discussion
 #show raw: set text(size: 6pt)
 
+The program is already compiled. 
+The following command is required to execute it:
+
+```console
+java -jar authentication.jar
+```
 
 Just after running the program, we can input the number of IoT devices in the System.
 We insert 5. 
@@ -345,7 +351,7 @@ All four messages follow exactly the specifications of the algorithm, and this i
 
 Both the IoT device and the server share the same key $t$.
 
-Now we try to authenticate IoT device number 3:
+Now, we try to authenticate IoT device number 3:
 
 ```console
 1) [IoT]        ID: 0           Auth: true      Key: 218, 176, 75, 154, 14, 24, 230, 239, 41, 49, 38, 2, 92, 150, 119, 21
@@ -362,7 +368,12 @@ We can see that the authentication succeeded again.
 
 Now we press 4, to test the communication, we select IoT device number 3, and we type "Hello, CPS!" as message.
 Two messages will be sent through the channel. 
-The first is the one sent from the device to the server, then the server decrypts the message, adds another secret message, and sends back a second message to the source.
+
+The first message contains the string chosen by the user.
+It is encrypted using the previously established key $t$.
+The server receives and decrypts the message, and appends another secret string to it.
+The message is then encrypted again for the transmission, and is sent back to the source.
+Finally, the IoT device decrypts the message and displays the content.
 
 The final decrypted message is:
 ```console
@@ -380,7 +391,7 @@ Payload contains 1 field(s):
 0) 0
 ```
 
-This correctly removes the device whose ID is 0.
+The IoT device sends a short coded message with type ```kt DEAUTH```, and is correctly interpreted by the Server as it removes the device whose ID is 0.
 
 ```console
 1) [IoT]        ID: 0           Auth: false
@@ -400,6 +411,58 @@ This encryption algorithm is secure against the most common attacks.
 The most known attack is the man in the middle.
 This attack assumes that the malicious entity can pose itself between the two devices, and manage both session to make the victims believe it's one.
 This attack is not possible because the key $t$ is generated using two separate numbers $t_1$ and $t_2$, and the messages that share those two numbers are encrypted using the keys stored on the vault.
+
+Another powerful class of attacks that can break AES are the side channel attacks based on power, memory and temperature analysis.
+The single key can technically be retrieved by the attacker, though it's impossible to retrieve the vault keys that generate it.
+The xor operation is just enough to protect such information.
+Hence, it's impossible to create a duplicate IoT device or inject false messages.
+
+The authors of the paper conducted some tests on performance.
+In order to have accurate results, they needed to choose a real IoT device to test the algorithm on, because doing it on a simulator is not representative of the real scenario.
+They decided to use Arduino, and conducted tests based on power drawn from the supply.
+The tests were conducted were on which algorithm to use, to balance between execution time and energy consumed, and the dimensionality of the vault.
+
+
+
+
+#figure(
+  text()[
+    #table(
+      columns: 3,
+      align: center,
+      [*Algorithm*], [*Execution time*], [*Energy consumed*],
+      [AES--128 bits], [$2.5 m s$], [$248.75 mu J$], 
+      [SHA 512], [$1 m s$], [$99.5 mu J$], 
+      [SHA 512 w/ HMAC], [$1.5 m s$], [$149.25 mu J$], 
+      [ECC], [$1105 m s$], [$109.95 m J$], 
+      [AES--256 bits], [$4 m s$], [$398 mu J$]
+    )
+  ], caption:"Energy consumption.", kind:"table", supplement:[Table]
+)<table:consumption>
+
+Their proposed algorithm requires one AES encryption/decryption, and one HMAC operation, making the total energy consumption equal to $646.75 mu J$.
+This value is low compared to the ECC based authentication algorithm.
+
+#figure(
+  text()[
+    #table(
+      columns: 4,
+      align: center,
+      [*m*], [*n*], [*bits*], [*Prediction complexity*],
+      [1], [128], [128], [1], 
+      [2], [128], [256], [$2^128$], 
+      [2], [256], [512], [$2^256$], 
+      [4], [128], [512], [$3 dot 2^128$], 
+      [4], [256], [1024], [$3 dot 2^256$], 
+      [8], [128], [1024], [$7 dot 2^128$], 
+      [8], [256], [2048], [$7 dot 2^256$], 
+      
+    )
+  ], caption:"Password prediction complexity.", kind:"table", supplement:[Table]
+)<table:complexity>
+
+
+
 
 
 
