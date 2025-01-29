@@ -144,7 +144,7 @@ In fact the communication can be eavesdropped, but the authentication algorithm 
 
   $M_2 = ( C_1, r_1 )$
 
-  where challenge $C_1 = {c_(11), c_(12), ... , c_(1p)}$ is a set of $p$ randomly picked distinct indices, and $"r_1"$ is a randomly generated number.
+  where challenge $C_1 = {c_(11), c_(12), ... , c_(1p)}$ is a set of $p$ randomly picked distinct indices, and $r_1$ is a randomly generated number.
   
   Note that $p < n$ and the values $c$ are between $0$ and $n-1$.
   ]
@@ -214,9 +214,7 @@ The current value of secure vault is divided into j equal partitions of k bits.
 The partition are ```kt xor``` operated with $h xor i$, where $i$ is the index of the partition. 
 If the size of the secure vault is not divisible by k bits, 0 is padded at the end to create j equal partitions.
 
-= Experiments
-
-== Software engineering
+= Software engineering
 
 #linebreak()
 *Message.kt*
@@ -288,8 +286,9 @@ Every device has a message inbound and outbound queues, and after every iteratio
 This way, it's possible to coordinate all messages to the correct queue. 
 In every channel we have one and only one ```kt Server```, with special $"ID" = 255$, and up to 255 instances of ```kt IoTDevices```, with ID starting from 0.
 
+= Experiments, Results and Discussion
+#linebreak()
 
-= Results and Discussion
 #show raw: set text(size: 6pt)
 
 The program is already compiled. 
@@ -338,6 +337,10 @@ The payload consists of three fields:
 + the randomly generated session ID.
 
 All four messages follow exactly the specifications of the algorithm, and this is confirmed by pressing 1 again to print the status:
+
+#linebreak()
+#linebreak()
+
 
 ```console
 1) [IoT]        ID: 0           Auth: true      Key: 218, 176, 75, 154, 14, 24, 230, 239, 41, 49, 38, 2, 92, 150, 119, 21
@@ -462,6 +465,8 @@ This value is low compared to the ECC based authentication algorithm.
 )<table:complexity>
 
 
+
+Also, the authors suggest some values for parameters $m$ and $n$ to reach a target complexity.
 
 
 
